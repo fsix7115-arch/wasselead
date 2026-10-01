@@ -45,6 +45,26 @@ class LeadStatus(str, Enum):
     LOST = "lost"
 
 
+# Phrases that mean "stop messaging me". This is deliberately fail-safe: if a
+# lead's own words could plausibly read as an opt-out, we skip them. A wrongly
+# skipped lead costs one lost follow-up; a message sent to someone who asked to
+# be left alone costs the client's number and their trust.
+_OPT_OUT_PATTERNS = (
+    r"\bstop\b", r"\bunsubscribe\b", r"\bopt[\s\-_]?out\b",
+    r"\bremove me\b", r"\bremove my\b", r"\bdo not (?:contact|call|message)\b",
+    r"\bdon'?t (?:contact|call|message)\b", r"\bleave me alone\b",
+    r"\bno longer (?:wish|want)\b", r"\bdelete my\b", r"\bnot interested\b",
+    r"\bblock me\b", r"\bcomplain\b",
+)
+
+_OPT_OUT_RE = re.compile("|".join(_OPT_OUT_PATTERNS), re.IGNORECASE)
+
+
+def looks_opted_out(message: str) -> bool:
+    """True when the message text itself reads as an opt-out request."""
+    return bool(_OPT_OUT_RE.search(message or ""))
+
+
 class LeadUrgency(str, Enum):
     """How badly this lead needs a reply, and why."""
 
@@ -91,7 +111,7 @@ class Lead:
         Order matters: an opt-out beats everything, and a booked lead is not
         urgent regardless of how long ago they wrote.
         """
-        if self.opted_out:
+        if self.opted_out or looks_opted_out(self.message):
             return LeadUrgency.DO_NOT_DISTURB
         if self.booked:
             return LeadUrgency.COLD

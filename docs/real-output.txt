@@ -1,3 +1,4 @@
+
 Lead follow-up — Apollo Physiotherapy & Fitness
 ============================================================
 Skipped 3:
@@ -9,7 +10,7 @@ Skipped 3:
         919876543213  — they replied and have had no answer
         "Hi Suresh, sorry for the delay in replying — thank you for your message. This is Dr. Meera from Apollo Physiotherapy & Fitness. How can I help?"
 
-[ HOT] Priya Sharma  LATE (due 2026-10-01T07:00)
+[ HOT] Priya Sharma       (due 2026-10-01T07:00)
         919876543210  — asked a question and got no answer
         "Hi Priya, this is Dr. Meera from Apollo Physiotherapy & Fitness. Thanks for asking — Physio sessions are ₹600 each (₹4,500 for 8 sessions). Personal training is ₹3,000/month. Want me to book you in?"
 
@@ -17,13 +18,13 @@ Skipped 3:
         919876543216  — asked a question and got no answer
         "Hi Rohit, this is Dr. Meera from Apollo Physiotherapy & Fitness. Thanks for asking — Physio sessions are ₹600 each (₹4,500 for 8 sessions). Personal training is ₹3,000/month. Want me to book you in?"
 
-[WARM] Rahul Verma  LATE (due 2026-10-01T08:00)
+[WARM] Rahul Verma       (due 2026-10-01T08:00)
         919876543211  — showed interest but no reply
-        "Hi Rahul, this is Dr. Meera from Apollo Physiotherapy & Fitness. Saw your message. First physio assessment is free this month Shall I share timings?"
+        "Hi Rahul, this is Dr. Meera from Apollo Physiotherapy & Fitness. Saw your message. First physio assessment is free this month. Shall I share timings?"
 
 [COLD] Anita Desai  LATE (due 2026-09-30T10:00)
         919876543212  — initial message, no reply yet
-        "Hi Anita, this is Dr. Meera from Apollo Physiotherapy & Fitness. Saw your message. First physio assessment is free this month Shall I share timings?"
+        "Hi Anita, this is Dr. Meera from Apollo Physiotherapy & Fitness. Saw your message. First physio assessment is free this month. Shall I share timings?"
 
 [COLD] Vikram Singh       (due 2026-10-02T10:00)
         919876543215  — booked — send a confirmation, not a sales message

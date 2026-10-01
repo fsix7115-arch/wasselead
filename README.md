@@ -1,5 +1,7 @@
 # WasseLead
 
+**Website (live demo):** https://fsix7115-arch.github.io/wasselead/
+
 **Chhote clinic, gym ya dukan ke liye WhatsApp lead follow-up.**
 Leads ko priority deta hai, message aapke tone me likhta hai, aur aapko
 copy-paste-ready plan deta hai. Kuch bhi automatically send nahi hota.
@@ -22,7 +24,10 @@ WasseLead:
 
 - ❌ Auto-send nahi karta. Aap khud paste karte ho WhatsApp me.
 - ❌ WhatsApp API use nahi karta — bulk automation se aapka number **ban** hota hai
-- ❌ Opt-out wale ko kabhi message nahi karta
+- ❌ Opt-out wale ko kabhi message nahi karta — flag ke saath message ke text dono check hote hain
+  (`stop`, `unsubscribe`, `remove me`, `not interested`, `do not contact`, …). Jab doubt ho,
+  lead skip ho jaati hai. Galat skip se ek follow-up chala jaata hai; galat message se
+  client ka number khatam hota hai.
 - ❌ Same number do baar message nahi karta
 
 Auto-send na karna limitation nahi hai — **yehi reason hai ye tool aapka number
@@ -44,7 +49,7 @@ python3 src/wasselead.py examples/leads.json --business examples/business.json
 ## Asli output
 
 ```
-$ python3 src/wasselead.py examples/leads.json --business examples/business.json
+$ python3 src/wasselead.py examples/leads.json --business examples/business.json --now 2026-10-01T10:00:00+00:00
 
 Lead follow-up — Apollo Physiotherapy & Fitness
 ============================================================
@@ -55,20 +60,29 @@ Skipped 3:
 
 [ HOT] Suresh Kumar  LATE (due 2026-09-25T12:00)
         919876543213  — they replied and have had no answer
-        "Hi Suresh, sorry for the delay in replying — thank you for your message.
-         This is Dr. Meera from Apollo Physiotherapy & Fitness. How can I help?"
+        "Hi Suresh, sorry for the delay in replying — thank you for your message. This is Dr. Meera from Apollo Physiotherapy & Fitness. How can I help?"
 
 [ HOT] Priya Sharma  LATE (due 2026-10-01T07:00)
         919876543210  — asked a question and got no answer
-        "Hi Priya, this is Dr. Meera from Apollo Physiotherapy & Fitness. Thanks
-         for asking — Physio sessions are ₹600 each (₹4,500 for 8 sessions).
-         Want me to book you in?"
+        "Hi Priya, this is Dr. Meera from Apollo Physiotherapy & Fitness. Thanks for asking — Physio sessions are ₹600 each (₹4,500 for 8 sessions). Personal training is ₹3,000/month. Want me to book you in?"
+
+[ HOT] Rohit Gupta       (due 2026-10-01T11:00)
+        919876543216  — asked a question and got no answer
+        "Hi Rohit, this is Dr. Meera from Apollo Physiotherapy & Fitness. Thanks for asking — Physio sessions are ₹600 each (₹4,500 for 8 sessions). Personal training is ₹3,000/month. Want me to book you in?"
 
 [WARM] Rahul Verma  LATE (due 2026-10-01T08:00)
         919876543211  — showed interest but no reply
-        "Hi Rahul, this is Dr. Meera from Apollo Physiotherapy & Fitness. Saw your
-         message. First physio assessment is free this month. Shall I share timings?"
+        "Hi Rahul, this is Dr. Meera from Apollo Physiotherapy & Fitness. Saw your message. First physio assessment is free this month. Shall I share timings?"
 
+[COLD] Anita Desai  LATE (due 2026-09-30T10:00)
+        919876543212  — initial message, no reply yet
+        "Hi Anita, this is Dr. Meera from Apollo Physiotherapy & Fitness. Saw your message. First physio assessment is free this month. Shall I share timings?"
+
+[COLD] Vikram Singh       (due 2026-10-02T10:00)
+        919876543215  — booked — send a confirmation, not a sales message
+        "Hi Vikram, this is Dr. Meera from Apollo Physiotherapy & Fitness. Just confirming your appointment — reply YES to confirm or RESCHEDULE if you need a different time."
+
+============================================================
 Counts: cold=2, hot=3, warm=1
 Copy each message into WhatsApp yourself. Nothing is sent automatically.
 ```

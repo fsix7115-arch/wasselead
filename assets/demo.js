@@ -32,14 +32,18 @@ function first(n){ return (n.trim().split(/\s+/)[0]) || 'there'; }
 // composed message is never a run-on or a double stop. Mirrors clean() in
 // src/wasselead.py.
 export function clean(s){
+  // Trim only whitespace and collapse any trailing run of stops to a single
+  // one. The caller supplies the sentence punctuation, so this must not force
+  // a full stop or the next word runs into it. Mirrors clean() in
+  // src/wasselead.py.
   const v = String(s).trim().replace(/\.+$/,'');
-  return v ? v + '.' : v;
+  return v;
 }
 
 const TEMPLATES = {
-  hot:  c => `Hi ${first(c.name)}, got your enquiry about ${clean(c.interest)}. Is this week okay for a quick call?`,
-  warm: c => `Hi ${first(c.name)}, thanks for reaching out about ${clean(c.interest)}. Shall I share timings?`,
-  cold: c => `Hi ${first(c.name)}, this is about ${clean(c.interest)} you asked about. Want me to send the details?`
+  hot:  c => `Hi ${first(c.lead.name)}, got your enquiry about ${clean(c.interest)}. Is this week okay for a quick call?`,
+  warm: c => `Hi ${first(c.lead.name)}, thanks for reaching out about ${clean(c.interest)}. Shall I share timings?`,
+  cold: c => `Hi ${first(c.lead.name)}, this is about ${clean(c.interest)} you asked about. Want me to send the details?`
 };
 
 export function compose(c, level){

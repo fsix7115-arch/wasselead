@@ -295,5 +295,53 @@ class TestCLI(unittest.TestCase):
         self.assertIn("Follow-up", buf.getvalue().title().replace("Lead Follow-Up", "Follow-up"))
 
 
+
+
+class TestOptOutDetection(unittest.TestCase):
+    """Opt-out detection is safety-critical: messaging someone who asked to be
+    left alone is far worse than skipping one lead too many."""
+
+    def test_message_text_opt_out_is_detected(self):
+        for text in (
+            "Please remove me from this list",
+            "stop messaging me",
+            "unsubscribe please",
+            "I am not interested",
+            "do not contact me again",
+            "Don't call me",
+            "leave me alone",
+            "delete my number",
+            "no longer wish to receive these",
+        ):
+            with self.subTest(text=text):
+                self.assertTrue(wl.looks_opted_out(text))
+
+    def test_normal_enquiries_are_not_opt_out(self):
+        for text in (
+            "What are the charges for a cleaning?",
+            "interested, tell me more",
+            "Do you have slots tomorrow?",
+            "ok",
+            "how much for 8 sessions",
+            "I stopped jogging last year, can I still join?",
+        ):
+            with self.subTest(text=text):
+                self.assertFalse(wl.looks_opted_out(text))
+
+    def test_text_opt_out_lead_never_reaches_queue(self):
+        lead = wl.Lead(name="Sana", phone="9876500001",
+                    message="Please remove me", received_at="2026-01-01T00:00:00+00:00")
+        self.assertEqual(lead.urgency(), wl.LeadUrgency.DO_NOT_DISTURB)
+
+    def test_explicit_flag_still_wins(self):
+        lead = wl.Lead(name="Aman", phone="9876500002", message="What are charges?",
+                    received_at="2026-01-01T00:00:00+00:00", opted_out=True)
+        self.assertEqual(lead.urgency(), wl.LeadUrgency.DO_NOT_DISTURB)
+
+    def test_empty_message_is_safe(self):
+        self.assertFalse(wl.looks_opted_out(""))
+        self.assertFalse(wl.looks_opted_out(None))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

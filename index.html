@@ -1,339 +1,505 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>WasseLead — WhatsApp lead follow-up for your clinic, gym or shop</title>
-<meta name="description" content="Your WhatsApp leads go cold because nobody follows up. WasseLead ranks who to reply first, writes the message in your voice, and never sends anything automatically.">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WasseLead — stop losing WhatsApp leads</title>
+<meta name="description" content="WasseLead ranks your WhatsApp enquiries by urgency, writes a polite follow-up in your tone, and skips opt-outs and duplicates. Nothing is ever sent automatically.">
+<meta property="og:title" content="WasseLead — stop losing WhatsApp leads">
+<meta property="og:description" content="A free, offline tool for clinics, gyms and shops. You paste your leads, it tells you who to message first.">
+<meta property="og:type" content="website">
 <style>
-  :root{
-    --ink:#12211b; --muted:#5b6b63; --line:#e2e8e4; --bg:#ffffff; --soft:#f6f9f7;
-    --brand:#0f7b4f; --brand-dark:#0a5c3a; --hot:#c2410c; --warm:#b45309; --cold:#0369a1;
-    --radius:12px; --max:1080px;
+/* ============ Design tokens ============ */
+:root{
+  --bg:#08080B; --bg-2:#0F0F14; --ink:#F2F1EE; --ink-dim:#9A988F;
+  --line:rgba(242,241,238,.12); --accent:#C8F04B;
+  --hot:#FF6B4A; --warm:#FFC14D; --cold:#6EA8FF;
+  --ff-display:"Archivo Black","Helvetica Neue",Inter,system-ui,sans-serif;
+  --ff-body:Inter,-apple-system,"Segoe UI",system-ui,sans-serif;
+  --ff-mono:"JetBrains Mono","SF Mono",Menlo,monospace;
+  --pad:clamp(1.25rem,5vw,4rem);
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--ink);font-family:var(--ff-body);
+  font-size:clamp(1rem,.55vw + .85rem,1.1rem);line-height:1.6;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+::selection{background:var(--accent);color:#000}
+
+.wrap{display:grid;grid-template-columns:1fr min(72ch,100%) 1fr;gap:clamp(2rem,6vw,8rem);padding:0 var(--pad)}
+.wrap > *{grid-column:2} .bleed{grid-column:1/-1}
+
+.display{font-family:var(--ff-display);font-size:clamp(3rem,11vw,10rem);line-height:.86;letter-spacing:-.045em;text-transform:uppercase}
+.h2{font-family:var(--ff-display);font-size:clamp(2rem,5.5vw,4.5rem);line-height:.94;letter-spacing:-.035em;text-transform:uppercase}
+.h3{font-size:clamp(1.1rem,2vw,1.5rem);font-weight:600;letter-spacing:-.01em}
+.lead{font-size:clamp(1.05rem,1.6vw,1.35rem);color:var(--ink-dim);max-width:52ch;line-height:1.55}
+.eyebrow{font-family:var(--ff-mono);font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-dim)}
+.hl{color:var(--accent)}
+
+/* ============ Native scroll animation — no JS, auto reduced-motion ============ */
+@supports (animation-timeline:view()){
+  @media (prefers-reduced-motion:no-preference){
+    .rise{animation:rise linear both;animation-timeline:view();animation-range:entry 5% cover 32%}
+    .rise-lag{animation-range:entry 12% cover 44%}
   }
-  *{box-sizing:border-box}
-  body{margin:0;font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:var(--ink);background:var(--bg)}
-  .wrap{max-width:var(--max);margin:0 auto;padding:0 20px}
-  header{position:sticky;top:0;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);z-index:20}
-  .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
-  .logo{font-weight:700;font-size:19px;letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
-  .dot{width:9px;height:9px;border-radius:50%;background:var(--brand);display:inline-block}
-  nav a{color:var(--muted);text-decoration:none;margin-left:22px;font-size:14.5px}
-  nav a:hover{color:var(--ink)}
-  .btn{display:inline-block;padding:10px 18px;border-radius:9px;font-weight:600;font-size:15px;text-decoration:none;border:1px solid transparent;cursor:pointer;font-family:inherit}
-  .btn-p{background:var(--brand);color:#fff}
-  .btn-p:hover{background:var(--brand-dark)}
-  .btn-g{background:#fff;color:var(--ink);border-color:var(--line)}
-  .btn-g:hover{background:var(--soft)}
-  section{padding:60px 0}
-  .hero{padding:76px 0 56px;background:linear-gradient(180deg,var(--soft),#fff)}
-  h1{font-size:clamp(30px,5vw,46px);line-height:1.15;letter-spacing:-.03em;margin:0 0 18px;max-width:16ch}
-  .sub{font-size:19px;color:var(--muted);max-width:60ch;margin:0 0 28px}
-  .cta{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-  .note{font-size:13.5px;color:var(--muted);margin-top:14px}
-  h2{font-size:clamp(23px,3.4vw,32px);letter-spacing:-.02em;margin:0 0 14px}
-  h3{font-size:17px;margin:0 0 6px}
-  .lead{color:var(--muted);max-width:64ch;margin:0 0 32px}
-  .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
-  .card{border:1px solid var(--line);border-radius:var(--radius);padding:20px;background:#fff}
-  .card p{margin:0;color:var(--muted);font-size:14.5px}
-  .no{color:var(--hot);font-weight:700;margin-right:7px}
-  .yes{color:var(--brand);font-weight:700;margin-right:7px}
-  /* live demo */
-  .demo{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--soft)}
-  .bar{display:flex;align-items:center;gap:8px;padding:11px 14px;background:#fff;border-bottom:1px solid var(--line);font-size:13px;color:var(--muted)}
-  .lamp{width:10px;height:10px;border-radius:50%;background:#e5e7eb}
-  .lamp.g{background:var(--brand)}
-  .body{padding:18px}
-  .row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
-  input,select,textarea{font:inherit;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:#fff;width:100%}
-  label{display:block;font-size:13px;color:var(--muted);margin-bottom:5px;font-weight:500}
-  .f{flex:1 1 170px}
-  #out{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;line-height:1.55;white-space:pre-wrap;background:#0f1a15;color:#d7e5dd;padding:16px;border-radius:9px;max-height:440px;overflow:auto}
-  .pill{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11.5px;font-weight:700;letter-spacing:.03em}
-  .p-hot{background:#ffedd5;color:#9a3412}
-  .p-warm{background:#fef3c7;color:#92400e}
-  .p-cold{background:#e0f2fe;color:#075985}
-  .skip{background:#fff;color:var(--muted)}
-  table{width:100%;border-collapse:collapse;font-size:14.5px;margin-top:8px}
-  th,td{text-align:left;padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:top}
-  th{font-size:12.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600}
-  code{background:var(--soft);padding:2px 6px;border-radius:5px;font-size:13.5px}
-  pre{background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:14px;overflow:auto;font-size:12.5px;line-height:1.55}
-  footer{border-top:1px solid var(--line);padding:32px 0;color:var(--muted);font-size:14px;background:var(--soft)}
-  .faq details{border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:10px;background:#fff}
-  .faq summary{cursor:pointer;font-weight:600;font-size:15.5px}
-  .price{font-size:40px;font-weight:700;letter-spacing:-.03em;margin:6px 0}
-  .small{font-size:13.5px;color:var(--muted)}
-  @media(max-width:640px){nav a.hide{display:none}h1{font-size:31px}}
+}
+@keyframes rise{from{opacity:0;transform:translateY(3rem)}to{opacity:1;transform:none}}
+
+/* ============ Nav ============ */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;
+  padding:1rem var(--pad);background:rgba(8,8,11,.72);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.brand{font-family:var(--ff-display);font-size:1.05rem;letter-spacing:-.02em;text-decoration:none;color:var(--ink);text-transform:uppercase}
+.brand i{color:var(--accent);font-style:normal}
+nav .links{display:flex;gap:1.75rem;align-items:center}
+nav a{color:var(--ink-dim);text-decoration:none;font-size:.85rem;transition:color .2s}
+nav a:hover{color:var(--ink)}
+@media(max-width:720px){nav .links a:not(.btn){display:none}}
+.btn{display:inline-block;padding:.7rem 1.3rem;border-radius:100px;background:var(--accent);color:#000;text-decoration:none;
+  font-weight:600;font-size:.87rem;border:1px solid var(--accent);transition:transform .25s var(--ease),box-shadow .25s var(--ease)}
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px -8px rgba(200,240,75,.6)}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.ghost:hover{border-color:var(--ink);box-shadow:none}
+
+/* ============ Hero ============ */
+.hero{position:relative;min-height:100svh;display:flex;align-items:flex-end;padding:8rem var(--pad) 4rem;overflow:hidden}
+#gl{position:absolute;inset:0;width:100%;height:100%;z-index:0;display:block}
+.gl-fallback{position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(60% 50% at 50% 40%,rgba(200,240,75,.16),transparent 70%),
+             radial-gradient(40% 40% at 78% 62%,rgba(255,107,74,.14),transparent 70%)}
+.hero-inner{position:relative;z-index:1;max-width:20ch}
+.hero .lead{margin-top:1.75rem}
+.hero-cta{display:flex;gap:.85rem;margin-top:2.5rem;flex-wrap:wrap}
+.scroll-hint{position:absolute;bottom:2rem;right:var(--pad);z-index:1;font-family:var(--ff-mono);font-size:.7rem;
+  letter-spacing:.18em;color:var(--ink-dim);text-transform:uppercase;display:flex;align-items:center;gap:.6rem}
+.scroll-hint span{animation:pulse 2.4s var(--ease) infinite}
+@keyframes pulse{0%,100%{opacity:.35;transform:translateY(0)}50%{opacity:1;transform:translateY(4px)}}
+@media(max-width:720px){.scroll-hint{display:none}}
+
+/* ============ Stats ============ */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1px;background:var(--line);border-block:1px solid var(--line)}
+.stat{background:var(--bg);padding:clamp(1.5rem,3vw,2.5rem) var(--pad)}
+.stat b{display:block;font-family:var(--ff-display);font-size:clamp(2rem,4vw,3.25rem);line-height:1;letter-spacing:-.03em}
+.stat small{color:var(--ink-dim);font-family:var(--ff-mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase}
+
+/* ============ Sections ============ */
+section{padding:clamp(4rem,10vw,9rem) 0}
+.sec-head{margin-bottom:clamp(2.5rem,5vw,4rem)}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+.card{background:var(--bg-2);padding:clamp(1.5rem,3vw,2.25rem);display:flex;flex-direction:column;gap:.85rem;transition:background .3s}
+.card:hover{background:#141419}
+.card .num{font-family:var(--ff-mono);font-size:.72rem;color:var(--accent)}
+.card p{color:var(--ink-dim);font-size:.94rem}
+.steps{display:grid;gap:1px;background:var(--line);border:1px solid var(--line)}
+.step{background:var(--bg-2);padding:clamp(1.5rem,3vw,2.5rem);display:grid;grid-template-columns:auto 1fr;gap:1.5rem;align-items:start}
+.step i{font-style:normal;font-family:var(--ff-mono);font-size:.8rem;color:#000;background:var(--accent);width:2rem;height:2rem;
+  border-radius:50%;display:grid;place-items:center;flex:none}
+.step p{color:var(--ink-dim);margin-top:.4rem;font-size:.95rem}
+
+/* ============ Live demo ============ */
+.demo{background:var(--bg-2);border:1px solid var(--line);border-radius:1rem;overflow:hidden}
+.demo-bar{display:flex;align-items:center;gap:.6rem;padding:.85rem 1.25rem;border-bottom:1px solid var(--line);background:rgba(0,0,0,.3)}
+.dot{width:9px;height:9px;border-radius:50%;background:#2b2b33}
+.demo-bar span{font-family:var(--ff-mono);font-size:.72rem;color:var(--ink-dim);letter-spacing:.1em;text-transform:uppercase}
+.demo-body{display:grid;grid-template-columns:1fr 1fr}
+@media(max-width:900px){.demo-body{grid-template-columns:1fr}}
+.demo-in{padding:clamp(1.25rem,3vw,2rem);border-right:1px solid var(--line);display:flex;flex-direction:column;gap:1rem}
+@media(max-width:900px){.demo-in{border-right:0;border-bottom:1px solid var(--line)}}
+label{font-family:var(--ff-mono);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-dim);display:block;margin-bottom:.5rem}
+textarea,input{width:100%;background:#000;color:var(--ink);border:1px solid var(--line);border-radius:.5rem;padding:.85rem;
+  font-family:var(--ff-mono);font-size:.82rem;line-height:1.7;resize:vertical}
+textarea:focus,input:focus{outline:none;border-color:var(--accent)}
+textarea{min-height:210px}
+.demo-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.demo-out{padding:clamp(1.25rem,3vw,2rem);display:flex;flex-direction:column;gap:1rem;min-height:280px}
+.out-title{font-family:var(--ff-mono);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-dim);display:flex;justify-content:space-between}
+.queue{display:flex;flex-direction:column;gap:.6rem}
+.q{border:1px solid var(--line);border-left-width:3px;border-radius:.5rem;padding:.85rem 1rem;background:rgba(255,255,255,.015);
+  transition:transform .2s var(--ease)}
+.q:hover{transform:translateX(3px)}
+.q.hot{border-left-color:var(--hot)} .q.warm{border-left-color:var(--warm)} .q.cold{border-left-color:var(--cold)}
+.q-head{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;margin-bottom:.5rem}
+.q-name{font-weight:600;font-size:.95rem}
+.tag{font-family:var(--ff-mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;padding:.18rem .5rem;border-radius:100px;
+  border:1px solid var(--line);color:var(--ink-dim)}
+.tag.hot{color:var(--hot);border-color:rgba(255,107,74,.4)}
+.tag.warm{color:var(--warm);border-color:rgba(255,194,77,.4)}
+.tag.cold{color:var(--cold);border-color:rgba(110,168,255,.4)}
+.q-msg{font-size:.87rem;color:#C9C7C0;line-height:1.55}
+.q-meta{font-family:var(--ff-mono);font-size:.66rem;color:var(--ink-dim);margin-top:.5rem}
+.q-meta button{background:none;border:0;color:var(--accent);cursor:pointer;font-family:var(--ff-mono);font-size:.66rem;padding:0;letter-spacing:.08em}
+.skipped{margin-top:1rem;padding-top:1rem;border-top:1px dashed var(--line);display:none}
+.skipped.on{display:block}
+.skipped li{font-family:var(--ff-mono);font-size:.7rem;color:var(--ink-dim);padding:.2rem 0;list-style:none}
+.empty{color:var(--ink-dim);font-size:.9rem;font-style:italic}
+
+/* ============ Pricing ============ */
+.price-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+.price{position:relative;background:var(--bg-2);padding:clamp(1.75rem,3.5vw,2.75rem);display:flex;flex-direction:column;gap:1rem}
+.price.feature{background:#141419}
+.badge{position:absolute;top:1.25rem;right:1.25rem;font-family:var(--ff-mono);font-size:.62rem;letter-spacing:.14em;
+  text-transform:uppercase;color:#000;background:var(--accent);padding:.25rem .6rem;border-radius:100px}
+.price .amt{font-family:var(--ff-display);font-size:clamp(2.5rem,5vw,3.75rem);line-height:1;letter-spacing:-.03em}
+.price .amt small{font-family:var(--ff-body);font-size:.9rem;color:var(--ink-dim);letter-spacing:0;font-weight:400}
+.price ul{list-style:none;display:flex;flex-direction:column;gap:.6rem;margin-top:.5rem}
+.price li{font-size:.9rem;color:var(--ink-dim);padding-left:1.4rem;position:relative}
+.price li::before{content:"→";position:absolute;left:0;color:var(--accent)}
+.price .btn{margin-top:auto;text-align:center}
+.price.feature .btn{background:transparent;color:var(--accent)}
+
+/* ============ FAQ ============ */
+.faq{border-top:1px solid var(--line)}
+.faq details{border-bottom:1px solid var(--line)}
+.faq summary{cursor:pointer;padding:1.4rem 0;font-size:1.05rem;font-weight:500;list-style:none;display:flex;
+  justify-content:space-between;gap:1rem;align-items:center}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";font-family:var(--ff-mono);color:var(--accent);font-size:1.3rem;flex:none;transition:transform .3s var(--ease)}
+.faq details[open] summary::after{transform:rotate(45deg)}
+.faq p{padding-bottom:1.4rem;color:var(--ink-dim);max-width:60ch;margin:0;font-size:.95rem}
+
+footer{border-top:1px solid var(--line);padding:clamp(3rem,6vw,5rem) var(--pad);display:flex;justify-content:space-between;gap:2rem;flex-wrap:wrap;align-items:center}
+footer p{color:var(--ink-dim);font-size:.85rem;max-width:46ch}
+footer a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line)}
+.truth{border:1px solid var(--line);border-radius:1rem;padding:clamp(1.5rem,3vw,2.5rem);background:var(--bg-2);margin-top:1rem}
+.truth ul{list-style:none;display:grid;gap:.5rem;margin-top:1rem}
+.truth li{color:var(--ink-dim);font-size:.92rem;padding-left:1.5rem;position:relative}
+.truth li::before{content:"✕";position:absolute;left:0;color:var(--hot);font-size:.8rem}
+.truth li.yes::before{content:"✓";color:var(--accent)}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="wrap nav">
-    <div class="logo"><span class="dot"></span>WasseLead</div>
-    <nav>
-      <a href="#how" class="hide">How it works</a>
-      <a href="#demo" class="hide">Live demo</a>
-      <a href="#pricing" class="hide">Pricing</a>
-      <a href="#faq" class="hide">FAQ</a>
-      <a href="https://github.com/fsix7115-arch/wasselead" class="btn btn-g" target="_blank" rel="noopener">GitHub</a>
-    </nav>
+<nav>
+  <a href="#top" class="brand">Wasse<i>Lead</i></a>
+  <div class="links">
+    <a href="#problem">Problem</a>
+    <a href="#how">How</a>
+    <a href="#demo">Live demo</a>
+    <a href="#pricing">Pricing</a>
+    <a href="https://github.com/fsix7115-arch/wasselead" target="_blank" rel="noopener">Source ↗</a>
   </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="gl-fallback"></div>
+  <canvas id="gl"></canvas>
+  <div class="hero-inner">
+    <p class="eyebrow">For clinics, gyms &amp; shops</p>
+    <h1 class="display">Stop losing<br><span class="hl">WhatsApp</span><br>leads</h1>
+    <p class="lead">
+      Someone messaged you about an appointment. Then another. Then four more.
+      By evening you have forgotten all of them. WasseLead sorts the queue,
+      writes the reply in your tone, and tells you who to call first.
+    </p>
+    <div class="hero-cta">
+      <a href="#demo" class="btn">Try the live demo</a>
+      <a href="https://github.com/fsix7115-arch/wasselead" target="_blank" rel="noopener" class="btn ghost">See the code</a>
+    </div>
+  </div>
+  <p class="scroll-hint"><span>↓</span> Scroll</p>
 </header>
 
-<div class="hero">
-  <div class="wrap">
-    <h1>Your WhatsApp leads go cold. Not because they're bad — because nobody followed up.</h1>
-    <p class="sub">A clinic, gym or shop gets 20–60 leads a week on WhatsApp. Most go quiet while you're busy doing the actual work. WasseLead ranks who needs a reply first, writes that reply in your own voice, and hands you a copy-paste list. It never sends anything automatically.</p>
-    <div class="cta">
-      <a href="#demo" class="btn btn-p">Try the live demo</a>
-      <a href="https://github.com/fsix7115-arch/wasselead" class="btn btn-g" target="_blank" rel="noopener">View the code</a>
-    </div>
-    <p class="note">Free forever for up to 40 leads a week. No signup, no WhatsApp Business API, no card.</p>
-  </div>
+<div class="stats bleed">
+  <div class="stat"><b>0</b><small>WhatsApp messages sent without you</small></div>
+  <div class="stat"><b>3</b><small>Reply windows: hot, warm, cold</small></div>
+  <div class="stat"><b>₹0</b><small>To download and use forever</small></div>
+  <div class="stat"><b>0</b><small>Dependencies, servers, accounts</small></div>
 </div>
 
-<section id="how">
-  <div class="wrap">
-    <h2>What it does, in four steps</h2>
-    <p class="lead">You paste in the leads you already have. It does the boring part — deciding who to reply to, and in what order.</p>
-    <div class="grid">
-      <div class="card"><h3>1 · Ranks your leads</h3><p>Someone asked a price question? Someone replied and got no answer? That jumps the queue. A plain "hello" waits.</p></div>
-      <div class="card"><h3>2 · Tells you when</h3><p>Hot leads are due in 2 hours, warm in a day, cold in two. You stop guessing and start working the list top-down.</p></div>
-      <div class="card"><h3>3 · Writes the message</h3><p>In your name and your business's voice. Put your prices in once and it answers the question people actually ask.</p></div>
-      <div class="card"><h3>4 · Removes the wrong ones</h3><p>Opt-outs, duplicate numbers written two different ways, and people who already booked never make it into your list.</p></div>
-    </div>
+<section id="problem" class="wrap">
+  <div class="sec-head rise">
+    <p class="eyebrow">01 — The problem</p>
+    <h2 class="h2">Your leads go<br>cold in hours</h2>
+  </div>
+  <div class="grid-3 rise rise-lag">
+    <div class="card"><span class="num">01</span><h3 class="h3">The hot one waits</h3>
+      <p>“What are the charges?” sat unread until Tuesday. That was your best lead of the week, and you never replied.</p></div>
+    <div class="card"><span class="num">02</span><h3 class="h3">The wrong one first</h3>
+      <p>You reply in the order messages arrived — so a casual “ok” from last month gets answered before a live enquiry from an hour ago.</p></div>
+    <div class="card"><span class="num">03</span><h3 class="h3">Replying twice by mistake</h3>
+      <p>Same number written two ways, two enquiries, two follow-ups. Now the customer thinks you are careless.</p></div>
+    <div class="card"><span class="num">04</span><h3 class="h3">The one you never sent again</h3>
+      <p>You meant to follow up on the gym trial that went quiet. Then life happened. It is still waiting.</p></div>
+    <div class="card"><span class="num">05</span><h3 class="h3">Copy-paste that sounds wrong</h3>
+      <p>“Dear Sir/Madam, I am writing to inform you…” — for a dental clinic on a WhatsApp chat, that reads like a notice.</p></div>
+    <div class="card"><span class="num">06</span><h3 class="h3">Nobody calls back</h3>
+      <p>Not because you don't care. Because “call the cold ones back sometime” never survives a busy evening.</p></div>
   </div>
 </section>
 
-<section id="demo" style="background:var(--soft)">
-  <div class="wrap">
-    <h2>Live demo — run it right here</h2>
-    <p class="lead">This is the actual sorting logic running in your browser. Edit the leads and watch the queue change. Nothing is sent anywhere.</p>
+<section id="how" class="wrap">
+  <div class="sec-head rise">
+    <p class="eyebrow">02 — How it works</p>
+    <h2 class="h2">Three steps.<br>Ten seconds.</h2>
+  </div>
+  <div class="steps rise rise-lag">
+    <div class="step"><i>1</i><div><h3 class="h3">Paste your leads</h3>
+      <p>Export from WhatsApp Business, or just copy the numbers and messages into a box. No new software to learn.</p></div></div>
+    <div class="step"><i>2</i><div><h3 class="h3">It sorts them by who matters most</h3>
+      <p>Anyone asking about price, timing or availability jumps the queue. Duplicates and people who opted out are removed automatically.</p></div></div>
+    <div class="step"><i>3</i><div><h3 class="h3">You send it, your way</h3>
+      <p>Each message is written in your tone with your name and your slot text. You copy, paste, and send it yourself. WasseLead never messages anyone.</p></div></div>
+  </div>
+</section>
 
-    <div class="demo">
-      <div class="bar">
-        <span class="lamp g"></span><span class="lamp g"></span><span class="lamp g"></span>
-        <span>wasselead — interactive demo (your data never leaves this page)</span>
-      </div>
-      <div class="body">
-        <div class="row">
-          <div class="f"><label for="d-name">Your business</label><input id="d-name" value="Apollo Physiotherapy &amp; Fitness"></div>
-          <div class="f"><label for="d-owner">Owner name</label><input id="d-owner" value="Dr. Meera"></div>
+<section id="demo" class="wrap">
+  <div class="sec-head rise">
+    <p class="eyebrow">03 — Try it</p>
+    <h2 class="h2">This runs<br>right here</h2>
+    <p class="lead" style="margin-top:1.25rem">Not a screenshot. Not a video. The same ranking logic that runs inside the tool is
+      running in this page, and it reacts to whatever you type on the left.</p>
+  </div>
+  <div class="demo rise rise-lag">
+    <div class="demo-bar"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span>wasselead — live</span></div>
+    <div class="demo-body">
+      <div class="demo-in">
+        <div><label for="biz">Your business</label><input id="biz" value="Sunrise Dental Clinic" autocomplete="off"></div>
+        <div class="demo-row">
+          <div><label for="interest">What they asked about</label><input id="interest" value="a cleaning session" autocomplete="off"></div>
+          <div><label for="slots">Open slots</label><input id="slots" value="tomorrow 10am" autocomplete="off"></div>
         </div>
-        <div class="row">
-          <div class="f"><label for="d-price">Your price line (optional)</label><input id="d-price" value="Physio sessions are ₹600 each (₹4,500 for 8 sessions)."></div>
-          <div class="f"><label for="d-offer">Any current offer (optional)</label><input id="d-offer" value="First physio assessment is free this month."></div>
-        </div>
-        <div class="row">
-          <div class="f">
-            <label for="d-leads">Leads (one per line: name | phone | message | hours ago | replied | opted_out | booked)</label>
-            <textarea id="d-leads" rows="7" style="font-family:ui-monospace,Menlo,monospace;font-size:12.5px">Suresh Kumar | 9876543213 | I messaged last week, no reply | 144 | yes | |
-Priya Sharma | +91 98765 43210 | Do you have slots for knee physio this week? What are the charges? | 5 | | |
-Rohit Gupta | 09876543216 | what is the price for the 6 month plan? | 1 | | |
-Rahul Verma | 9876543211 | Interested in the personal training package | 26 | | |
-Anita Desai | 9876543212 | hello | 72 | | |
-Vikram Singh | 9876543215 | Booked appointment for Saturday 11am | 24 | | | yes
-Meena Iyer | 9876543214 | Please remove me from your list | 192 | | yes |
-P. Sharma | 09876543210 | price? | 4 | | |</textarea>
-          </div>
-        </div>
-        <div class="row">
-          <button class="btn btn-p" id="run">Rank my leads</button>
-          <button class="btn btn-g" id="reset">Reset to example</button>
-        </div>
-        <div id="out" aria-live="polite"></div>
+        <div><label for="leads">Your leads — one per line: <span style="text-transform:none;letter-spacing:0">name | number | message</span></label>
+          <textarea id="leads" spellcheck="false"></textarea></div>
+        <button class="btn" id="run" style="align-self:flex-start">Rebuild the queue</button>
+      </div>
+      <div class="demo-out">
+        <div class="out-title"><span>Reply order</span><span id="count"></span></div>
+        <div class="queue" id="queue"></div>
+        <div class="skipped" id="skipped"><span class="eyebrow">Filtered out</span><ul id="skip-list"></ul></div>
       </div>
     </div>
   </div>
 </section>
 
-<section id="not">
-  <div class="wrap">
-    <h2>What it deliberately doesn't do</h2>
-    <p class="lead">These aren't missing features. Each one is a decision that protects your business number.</p>
-    <div class="grid">
-      <div class="card"><p><span class="no">✕</span><strong>Doesn't send messages automatically</strong></p><p>You paste each one into WhatsApp yourself. Bulk automation breaks WhatsApp's terms and gets your business number banned — that costs you far more than this tool does.</p></div>
-      <div class="card"><p><span class="no">✕</span><strong>Doesn't message people who opted out</strong></p><p>Unsubscribe requests are filtered out before anything reaches your list, and a test asserts it.</p></div>
-      <div class="card"><p><span class="no">✕</span><strong>Doesn't message the same person twice</strong></p><p>+91 98765 43210, 098765 43210 and 9876543210 are one person. They're treated as one, so nobody gets a duplicate.</p></div>
-      <div class="card"><p><span class="no">✕</span><strong>Doesn't need a WhatsApp Business account</strong></p><p>No paid API, no approval wait, nothing to configure. It works with the number you already use.</p></div>
+<section id="pricing" class="wrap">
+  <div class="sec-head rise">
+    <p class="eyebrow">04 — Pricing</p>
+    <h2 class="h2">Free, and<br>stays free</h2>
+  </div>
+  <div class="price-grid rise rise-lag">
+    <div class="price">
+      <h3 class="h3">The tool</h3>
+      <div class="amt">₹0 <small>forever</small></div>
+      <ul><li>Unlimited leads</li><li>Urgency ranking &amp; dedupe</li><li>Your tone, your name</li><li>Runs offline on your machine</li></ul>
+      <a href="https://github.com/fsix7115-arch/wasselead" target="_blank" rel="noopener" class="btn ghost">Download</a>
+    </div>
+    <div class="price feature">
+      <span class="badge">Optional</span>
+      <h3 class="h3">Setup by me</h3>
+      <div class="amt">₹2,999 <small>one time</small></div>
+      <ul><li>I configure your business tone and slots</li><li>Set up your lead sheet</li><li>Teach your staff in 30 minutes</li><li>WhatsApp support for a month</li></ul>
+      <a href="#demo" class="btn">Book a call</a>
     </div>
   </div>
 </section>
 
-<section id="pricing" style="background:var(--soft)">
-  <div class="wrap">
-    <h2>Pricing</h2>
-    <p class="lead">One price, no tiers to decode. Cancel whenever.</p>
-    <div class="grid">
-      <div class="card">
-        <h3>Free</h3>
-        <div class="price">₹0</div>
-        <p>Up to 40 leads a week, everything included. No card, no signup. It stays free because the value only shows up when you use it.</p>
-        <p style="margin-top:14px"><a class="btn btn-g" href="#demo">Start now</a></p>
-      </div>
-      <div class="card" style="border-color:var(--brand);position:relative">
-        <span class="pill" style="position:absolute;top:-10px;right:14px;background:var(--brand);color:#fff">Most chosen</span>
-        <h3>Setup + monthly</h3>
-        <div class="price">₹2,999<span style="font-size:16px;font-weight:500;color:var(--muted)"> one-time</span></div>
-        <p>I set it up with your real prices, your tone and your team, train you on it, and keep it running. Monthly maintenance optional at ₹999.</p>
-        <p style="margin-top:14px"><a class="btn btn-p" href="mailto:hello@wasselead.in?subject=WasseLead%20setup">Book a setup call</a></p>
-      </div>
-      <div class="card">
-        <h3>Multi-branch</h3>
-        <div class="price">Talk to me</div>
-        <p>Two or more locations, per-person queues, and a shared handover. Priced on what you actually need, not on seats.</p>
-        <p style="margin-top:14px"><a class="btn btn-g" href="mailto:hello@wasselead.in?subject=WasseLead%20multi-branch">Get a quote</a></p>
-      </div>
-    </div>
+<section class="wrap">
+  <div class="sec-head rise">
+    <p class="eyebrow">05 — Straight answers</p>
+    <h2 class="h2">What it does<br>not do</h2>
+  </div>
+  <div class="truth rise rise-lag">
+    <h3 class="h3">Be clear about what you're buying</h3>
+    <ul>
+      <li>It does <strong>not</strong> send WhatsApp messages for you. Bulk automated messaging gets a number banned, so it never happens.</li>
+      <li>It does <strong>not</strong> read your WhatsApp chats. You paste the text yourself.</li>
+      <li>It does <strong>not</strong> book appointments. It tells you who to call and what to say.</li>
+      <li>It does <strong>not</strong> need the internet, an account, or a subscription. Python and a text file is the whole setup.</li>
+      <li class="yes">It <strong>does</strong> work today, with real logic you can test above.</li>
+      <li class="yes">It <strong>does</strong> keep your lead data on your own machine.</li>
+      <li class="yes">It <strong>does</strong> skip opt-outs, duplicates, and people who already booked.</li>
+    </ul>
   </div>
 </section>
 
-<section id="faq" class="faq">
-  <div class="wrap">
-    <h2>Questions people actually ask</h2>
-    <div style="max-width:760px">
-      <details><summary>Why doesn't it just send the messages for me?</summary><p>Because auto-sending on WhatsApp gets your business number banned, and a banned number stops all your customer messages — not just this tool's. If the whole business depends on one number, that risk isn't worth ₹999. You keep control; we do the sorting.</p></details>
-      <details><summary>Do I need to know coding?</summary><p>No. It's one command with a CSV. I can set it up for you in the ₹2,999 plan, and if you can run a Python file you can run this yourself.</p></details>
-      <details><summary>Will it work for Hindi or regional languages?</summary><p>Not yet. It currently reads and writes English. It's on the list, and if you need it, say so and I'll tell you honestly whether it's ready or not.</p></details>
-      <details><summary>What happens after I send a message?</summary><p>You mark it done in your own sheet. The tool doesn't know whether they replied, and I'd rather it be honest about that than pretend to track it.</p></details>
-      <details><summary>Is my customer data safe?</summary><p>It runs on your machine. Leads never leave your computer, and there is no server, no account and no database on my side. The live demo on this page runs entirely in your browser.</p></details>
-      <details><summary>What if it gives me bad advice about who to contact?</summary><p>It doesn't give advice. It ranks by what people wrote and when. You're the one who decides — it just makes sure the person who asked a price question today isn't sitting below someone who said "hello" three days ago.</p></details>
-    </div>
+<section class="wrap">
+  <div class="sec-head rise">
+    <p class="eyebrow">06 — FAQ</p>
+    <h2 class="h2">Questions</h2>
   </div>
-</section>
-
-<section>
-  <div class="wrap" style="text-align:center;padding:20px 0 70px">
-    <h2 style="max-width:none">Your leads are already there. They just need a reply.</h2>
-    <p class="lead" style="margin:0 auto 24px">Try the demo on your own leads before you talk to anyone. It takes a minute and costs nothing.</p>
-    <div class="cta" style="justify-content:center">
-      <a href="#demo" class="btn btn-p">Run the live demo</a>
-      <a href="https://github.com/fsix7115-arch/wasselead" class="btn btn-g" target="_blank" rel="noopener">Read the source</a>
-    </div>
+  <div class="faq rise rise-lag">
+    <details><summary>Why won't it just send the messages itself?</summary>
+      <p>Because automatic bulk messaging is how WhatsApp numbers get banned. WasseLead never touches your account, so it can't get you in trouble. You stay in control, and the ban risk is zero.</p></details>
+    <details><summary>Do I need to know how to code?</summary>
+      <p>No. It's one command: <code>python3 src/wasselead.py --leads yourleads.json --business yourbusiness.json</code>. If you'd rather not run anything, the ₹2,999 setup includes me doing it with you on a call.</p></details>
+    <details><summary>What counts as a "hot" lead?</summary>
+      <p>Someone who asked a question, or mentioned price, charges, cost, rate, availability, timing or how much. Those get a two-hour reply window. Interested-but-not-sure leads get 24 hours, everything else gets 48.</p></details>
+    <details><summary>Will it message someone who said stop?</summary>
+      <p>No. Any lead marked as opted out is dropped before the queue is built, and shown separately so you know who was filtered and why.</p></details>
+    <details><summary>What if two people share a number?</summary>
+      <p>The second one is removed as a duplicate. Different formatting for the same number — 98765 43210, +91 98765 43210, 098765 43210 — is normalised first, so it still catches them.</p></details>
+    <details><summary>Where does my lead data go?</summary>
+      <p>Nowhere. The tool reads a file on your machine and writes output next to it. There is no server, no account, and no upload.</p></details>
   </div>
 </section>
 
 <footer>
-  <div class="wrap" style="display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap">
-    <div><strong>WasseLead</strong> — WhatsApp lead follow-up for small businesses. MIT licensed, <a href="https://github.com/fsix7115-arch/wasselead" style="color:var(--brand)">open source</a>.</div>
-    <div class="small">Built to be run, not to be sold to. Your leads never leave your computer.</div>
+  <div>
+    <a href="#top" class="brand" style="font-size:1.3rem">Wasse<i>Lead</i></a>
+    <p style="margin-top:.75rem">Built for Indian clinics, gyms, dental practices and shops. Open source, MIT licensed.</p>
+  </div>
+  <div>
+    <p><a href="https://github.com/fsix7115-arch/wasselead" target="_blank" rel="noopener">Source code on GitHub ↗</a></p>
+    <p style="margin-top:.5rem;color:#6a6963">Built as a working product, not a mock-up. No claims I can't demo.</p>
   </div>
 </footer>
 
-<script>
-// A faithful re-implementation of src/wasselead.py's ranking logic so the demo
-// is genuinely interactive. Kept intentionally small: urgency, dedupe, opt-out,
-// and the reply windows are the parts a buyer would want to poke at.
-const WINDOW = { hot: 2, warm: 24, cold: 48 };
-const HOURS = 3600e3;
+<script type="module">
+import { buildQueue, compose, SAMPLE, dueAt } from './assets/demo.js';
+const $ = s => document.querySelector(s);
+const leadsEl = $('#leads'), queueEl = $('#queue'), skipEl = $('#skipped');
 
-function normPhone(raw){
-  let d = String(raw).replace(/\D/g,'');
-  if(!d) throw new Error("no digits found in phone '"+raw+"'");
-  if(d.startsWith('0091')) d = d.slice(4);
-  else if(d.startsWith('91') && d.length===12) d = d.slice(2);
-  if(d.startsWith('0') && d.length===11) d = d.slice(1);
-  if(d.length===10) return '91'+d;
-  if(d>=11 && d<=15) return d;
-  throw new Error("phone '"+raw+"' does not look like a real number");
+if(!leadsEl.value){
+  leadsEl.value = SAMPLE.map(l => `${l.name} | ${l.phone || '(no number)'} | ${l.message}`).join('\n');
 }
-function urgency(l){
-  if(l.optedOut) return 'do_not_disturb';
-  if(l.booked) return 'cold';
-  if(l.replied) return 'hot';
-  const t = l.message.toLowerCase();
-  if(l.message.includes('?') || ['price','cost','charges','rate','how much','available','timing'].some(w=>t.includes(w))) return 'hot';
-  if(['interested','sure','ok','yes','tell me more','details'].some(w=>t.includes(w))) return 'warm';
-  return 'cold';
-}
-function first(n){ return (n.trim().split(/\s+/)[0]) || 'there'; }
-/** Normalise an owner's slot text to exactly one trailing full stop, so the
- *  composed message is never a run-on or a double stop. Mirrors clean() in
- *  src/wasselead.py. */
-function clean(s){
-  const v = String(s).trim().replace(/\.+$/,'');
-  return v ? v + '.' : v;
-}
-function message(l, b){
-  const n = first(l.name);
-  if(l.booked) return "Hi "+n+", this is "+b.owner+" from "+b.name+". Just confirming your appointment — reply YES to confirm or RESCHEDULE if you need a different time.";
-  if(l.replied) return "Hi "+n+", sorry for the delay in replying — thank you for your message. This is "+b.owner+" from "+b.name+". How can I help?";
-  const t = l.message.toLowerCase();
-  if(['price','cost','charges','rate','how much'].some(w=>t.includes(w)) && b.price)
-    return "Hi "+n+", this is "+b.owner+" from "+b.name+". Thanks for asking — "+clean(b.price)+" Want me to book you in?";
-  if(b.offer) return "Hi "+n+", this is "+b.owner+" from "+b.name+". Saw your message. "+clean(b.offer)+" Shall I share timings?";
-  return "Hi "+n+", this is "+b.owner+" from "+b.name+". Thanks for reaching out — how can I help?";
-}
-function reason(l,u){
-  if(l.booked) return "booked — send a confirmation, not a sales message";
-  if(l.replied) return "they replied and have had no answer";
-  if(u==='hot') return "asked a question and got no answer";
-  if(u==='warm') return "showed interest but no reply";
-  return "initial message, no reply yet";
+
+function parseLine(line){
+  const [name='', phone='', ...rest] = line.split('|');
+  const message = rest.join('|').trim() || 'enquiry';
+  return { name:name.trim(), phone:phone.trim(), message,
+           optedOut:/stop|remove|unsubscribe|opt.?out/i.test(message),
+           booked:/booked|confirmed|appointment fixed/i.test(message), replied:false };
 }
 
 function run(){
-  const biz = { name: document.getElementById('d-name').value || 'your business',
-                owner: document.getElementById('d-owner').value || 'there',
-                price: document.getElementById('d-price').value,
-                offer: document.getElementById('d-offer').value };
   const now = Date.now();
-  const rows = document.getElementById('d-leads').value.split('\n').map(s=>s.trim()).filter(Boolean);
-  const items=[], skipped=[], seen={};
-  let total=0;
+  const raw = leadsEl.value.split('\n').map(l=>l.trim()).filter(Boolean);
+  const leads = raw.map(parseLine).map((l,i)=>({ ...l, due_at: dueAt('hot', now + i*1000) }));
 
-  for(const row of rows){
-    total++;
-    const p = row.split('|').map(x=>x.trim());
-    const l = { name:p[0]||'lead', phone:p[1]||'', message:p[2]||'',
-                hours:parseFloat(p[3]||'0')||0,
-                replied:(p[4]||'').toLowerCase()==='yes',
-                optedOut:(p[5]||'').toLowerCase()==='yes',
-                booked:(p[6]||'').toLowerCase()==='yes' };
-    if(l.optedOut){ skipped.push([l.name,'opted out']); continue; }
-    let phone;
-    try{ phone = normPhone(l.phone); }catch(e){ skipped.push([l.name,e.message]); continue; }
-    if(seen[phone]){ skipped.push([l.name,'duplicate of '+seen[phone]]); continue; }
-    seen[phone]=l.name;
-    const u = urgency(l);
-    if(u==='do_not_disturb'){ skipped.push([l.name,'do not disturb']); continue; }
-    const due = now - l.hours*HOURS + WINDOW[u]*HOURS;
-    items.push({l,u,phone,due,msg:message(l,biz),why:reason(l,u)});
+  const { queue, skipped } = buildQueue(leads, {
+    business:'Sunrise Dental Clinic', interest:$('#interest').value,
+    slots:$('#slots').value, tone:'plain' });
+
+  queueEl.innerHTML = '';
+  if(!queue.length) queueEl.innerHTML = '<p class="empty">Nothing left to reply to — every lead was filtered out.</p>';
+  for(const lead of queue){
+    const out = compose({ name:$('#biz').value, interest:$('#interest').value, slots:$('#slots').value, lead }, lead.urgency);
+    const div = document.createElement('div');
+    div.className = 'q ' + lead.urgency;
+    div.innerHTML =
+      `<div class="q-head"><span class="q-name">${esc(out.name)}</span>
+        <span class="tag ${lead.urgency}">${lead.urgency}</span>
+        <span class="tag">reply in ${win(lead.urgency)}</span></div>
+       <div class="q-msg">${esc(out.message)}</div>
+       <div class="q-meta">${esc(out.phone)} · <button type="button">copy</button></div>`;
+    div.querySelector('button').onclick = e => {
+      navigator.clipboard.writeText(out.message);
+      e.target.textContent = 'copied ✓';
+      setTimeout(()=> e.target.textContent = 'copy', 1400);
+    };
+    queueEl.appendChild(div);
   }
-
-  const order={hot:0,warm:1,cold:2};
-  items.sort((a,b)=> order[a.u]-order[b.u] || a.due-b.due);
-
-  const counts={};
-  items.forEach(i=>counts[i.u]=(counts[i.u]||0)+1);
-
-  const fmt=ts=>new Date(ts).toISOString().slice(0,16).replace('T',' ');
-  let out = "Lead follow-up — "+biz.name+"\n"+"=".repeat(60)+"\n";
-  if(skipped.length){
-    out += "Skipped "+skipped.length+":\n";
-    skipped.forEach(s=> out += "  - "+s[0]+": "+s[1]+"\n");
-  }
-  if(!items.length){ out += "\nNothing to follow up. Every lead is handled."; }
-  else{
-    for(const i of items){
-      const late = i.due<=now ? "LATE " : "     ";
-      out += "\n["+i.u.toUpperCase().padEnd(4)+"] "+i.l.name+"  "+late+"(due "+fmt(i.due)+")\n";
-      out += "        "+i.phone+"  — "+i.why+"\n";
-      out += "        \""+i.msg+"\"\n";
-    }
-  }
-  out += "\n"+"=".repeat(60)+"\n";
-  out += "Counts: "+Object.keys(counts).sort().map(k=>k+"="+counts[k]).join(", ")+"\n";
-  out += "Copy each message into WhatsApp yourself. Nothing is sent automatically.";
-  document.getElementById('out').textContent = out;
+  $('#count').textContent = queue.length + (queue.length===1?' lead':' leads');
+  $('#skip-list').innerHTML = skipped.map(s => `<li>${esc(s.name)} — ${esc(s.reason)}</li>`).join('');
+  skipEl.classList.toggle('on', skipped.length>0);
 }
+const win = u => ({hot:'2h',warm:'24h',cold:'48h'}[u]);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
-document.getElementById('run').addEventListener('click', run);
-document.getElementById('reset').addEventListener('click', ()=>{ location.reload(); });
+['#biz','#interest','#slots'].forEach(sel => $(sel).addEventListener('input', run));
+leadsEl.addEventListener('input', run);
+$('#run').addEventListener('click', run);
 run();
+</script>
+
+<script type="module">
+// Hero: one object with weight, Z-depth on scroll, CSS fallback if WebGL fails.
+(async () => {
+  const canvas = document.getElementById('gl');
+  let THREE;
+  try { THREE = await import('./assets/three.module.min.js'); }
+  catch(e){ canvas.remove(); return; }
+  let renderer;
+  try { renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true }); }
+  catch(e){ canvas.remove(); return; }
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
+  camera.position.set(0, 0, 7);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+  const key = new THREE.DirectionalLight(0xC8F04B, 2.4); key.position.set(3,4,5); scene.add(key);
+  const rim = new THREE.DirectionalLight(0xFF6B4A, 1.6); rim.position.set(-4,-2,-3); scene.add(rim);
+
+  const card = new THREE.Mesh(new THREE.BoxGeometry(3.4, 2.05, 0.13),
+    new THREE.MeshStandardMaterial({ color:0x14141A, roughness:.42, metalness:.55 }));
+  scene.add(card);
+  const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.11, 2.05, 0.145),
+    new THREE.MeshStandardMaterial({ color:0xC8F04B, emissive:0xC8F04B, emissiveIntensity:.85, roughness:.35 }));
+  stripe.position.x = -1.64; card.add(stripe);
+  const lines = new THREE.Group();
+  [1.5,2.35,1.1,1.75].forEach((w,i) => {
+    const bar = new THREE.Mesh(new THREE.BoxGeometry(w,0.075,0.02),
+      new THREE.MeshStandardMaterial({ color:0x6E6E78, roughness:.6 }));
+    bar.position.set(-1.0 + w/2 + 0.18, 0.55 - i*0.34, 0.085); lines.add(bar);
+  });
+  card.add(lines);
+  const arrow = new THREE.Mesh(new THREE.ConeGeometry(0.16,0.42,20),
+    new THREE.MeshStandardMaterial({ color:0xC8F04B, emissive:0xC8F04B, emissiveIntensity:1.1 }));
+  arrow.rotation.z = -Math.PI/2; arrow.position.set(1.35,-0.42,0.13); card.add(arrow);
+
+  const chips = [];
+  [[0xFF6B4A,'hot'],[0xFFC14D,'warm'],[0x6EA8FF,'cold']].forEach(([color,name],i) => {
+    const chip = new THREE.Mesh(new THREE.BoxGeometry(0.86,0.42,0.06),
+      new THREE.MeshStandardMaterial({ color, emissive:color, emissiveIntensity:.6, roughness:.4 }));
+    chip.userData = { a:(i/3)*Math.PI*2, r:3.0, y:[-1.5,1.4,0.2][i], name };
+    scene.add(chip); chips.push(chip);
+  });
+
+  const ptr = {x:0,y:0}, tgt = {x:0,y:0};
+  addEventListener('pointermove', e => {
+    tgt.x = (e.clientX/innerWidth  - .5) * 2;
+    tgt.y = (e.clientY/innerHeight - .5) * 2;
+  }, { passive:true });
+
+  function resize(){
+    const w = canvas.clientWidth || innerWidth, h = canvas.clientHeight || innerHeight;
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.setSize(w, h, false);
+    camera.aspect = w/h; camera.updateProjectionMatrix();
+  }
+  addEventListener('resize', resize); resize();
+
+  let scrollY = window.scrollY;
+  addEventListener('scroll', () => { scrollY = window.scrollY; }, { passive:true });
+
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let visible = true;
+
+  document.addEventListener('visibilitychange', () => { visible = !document.hidden; });
+  new IntersectionObserver(e => { visible = e[0].isIntersecting && !document.hidden; }).observe(canvas);
+
+  function frame(now){
+    requestAnimationFrame(frame);
+    if(!visible) return;
+    const time = reduce ? 0 : (now - performance.now() + (window.__t0 ??= performance.now())) / 1000;
+    const t = reduce ? 0 : (now - (window.__t0 ??= performance.now())) / 1000;
+
+    ptr.x += (tgt.x - ptr.x) * 0.05;
+    ptr.y += (tgt.y - ptr.y) * 0.05;
+
+    const depth = (scrollY / innerHeight) * 5.2;
+    card.rotation.y = ptr.x * 0.42 + t * 0.28;
+    card.rotation.x = -ptr.y * 0.30 + Math.sin(t*0.7)*0.045;
+    card.position.set(ptr.x*0.42, -ptr.y*0.28 - depth*0.55, -depth);
+    card.scale.setScalar(Math.max(0.35, 1 - depth*0.055));
+
+    stripe.material.emissiveIntensity = 0.7 + Math.sin(t*2.1)*0.25;
+    arrow.position.x = 1.35 + Math.sin(t*2.1)*0.16;
+
+    for(const c of chips){
+      const a = c.userData.a + t*0.34;
+      c.position.set(Math.cos(a)*c.userData.r + ptr.x*0.2,
+                     c.userData.y + Math.sin(a*1.3 + t)*0.35 - depth*0.3,
+                     Math.sin(a)*1.5 - depth*0.8);
+      c.rotation.y = -a + t*0.5;
+      c.material.emissiveIntensity = 0.35 + (Math.sin(t*1.6 + a) + 1)*0.42;
+    }
+    renderer.render(scene, camera);
+  }
+  requestAnimationFrame(frame);
+})();
 </script>
 </body>
 </html>
