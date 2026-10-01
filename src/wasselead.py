@@ -176,16 +176,18 @@ def compose_message(lead: Lead, business: dict, now: datetime) -> str:
         )
 
     # Ask about price? Answer it directly instead of making them ask twice.
-    # Slot text is the owner's own writing, so it may or may not end in a full
-    # stop. Trim it before adding our punctuation, or the message says "..".
+    # Slot text is the owner's own writing, so it may or may not already end in
+    # punctuation. Normalise to exactly one full stop: neither a run-on
+    # ("month Shall I share") nor a double ("month.. Shall I share").
     def clean(value: str) -> str:
-        return value.strip().rstrip(".")
+        v = value.strip().rstrip(".")
+        return v + "." if v else v
 
     asked_price = any(w in lead.message.lower() for w in ("price", "cost", "charges", "rate", "how much"))
     if asked_price and slots.get("price"):
         return (
             f"Hi {name}, this is {owner} from {biz}. Thanks for asking — "
-            f"{clean(slots['price'])}. Want me to book you in?"
+            f"{clean(slots['price'])} Want me to book you in?"
         )
 
     if slots.get("offer"):

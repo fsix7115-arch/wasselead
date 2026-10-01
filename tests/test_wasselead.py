@@ -190,10 +190,25 @@ class TestMessages(unittest.TestCase):
         self.assertIn("₹600", msg)
 
     def test_no_double_punctuation(self):
-        """Slot text ends in a full stop; we add one too. Must not double it."""
-        msg = wl.compose_message(lead(message="what is the price?"), BIZ, NOW)
-        self.assertNotIn("..", msg)
-        self.assertNotIn("..", wl.compose_message(lead(message="hello"), BIZ, NOW))
+        """Slot text ends in a full stop; we must not add a second one."""
+        for text in ("₹600 per session.", "₹600 per session", "₹600 per session.."):
+            biz = {**BIZ, "slots": {"price": text, "offer": text}}
+            with self.subTest(text=text):
+                self.assertNotIn("..", wl.compose_message(lead(message="price?"), biz, NOW))
+                self.assertNotIn("..", wl.compose_message(lead(message="hello"), biz, NOW))
+
+    def test_sentences_are_separated(self):
+        """Slot text must end a sentence, not run into the next clause.
+
+        Regression: clean() used to strip the trailing full stop and the
+        template never put one back, producing "this month Shall I share".
+        """
+        for text in ("Free first assessment", "Free first assessment.", "Free first assessment.."):
+            biz = {**BIZ, "slots": {"offer": text}}
+            with self.subTest(text=text):
+                msg = wl.compose_message(lead(message="hello"), biz, NOW)
+                self.assertIn("assessment. Shall", msg)
+                self.assertNotIn("assessment Shall", msg)
 
     def test_names_the_owner_and_business(self):
         msg = wl.compose_message(lead(), BIZ, NOW)

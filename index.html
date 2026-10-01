@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WasseLead — WhatsApp lead follow-up for your clinic, gym or shop</title>
+<meta name="description" content="Your WhatsApp leads go cold because nobody follows up. WasseLead ranks who to reply first, writes the message in your voice, and never sends anything automatically.">
+<style>
+  :root{
+    --ink:#12211b; --muted:#5b6b63; --line:#e2e8e4; --bg:#ffffff; --soft:#f6f9f7;
+    --brand:#0f7b4f; --brand-dark:#0a5c3a; --hot:#c2410c; --warm:#b45309; --cold:#0369a1;
+    --radius:12px; --max:1080px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:var(--ink);background:var(--bg)}
+  .wrap{max-width:var(--max);margin:0 auto;padding:0 20px}
+  header{position:sticky;top:0;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);z-index:20}
+  .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+  .logo{font-weight:700;font-size:19px;letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--brand);display:inline-block}
+  nav a{color:var(--muted);text-decoration:none;margin-left:22px;font-size:14.5px}
+  nav a:hover{color:var(--ink)}
+  .btn{display:inline-block;padding:10px 18px;border-radius:9px;font-weight:600;font-size:15px;text-decoration:none;border:1px solid transparent;cursor:pointer;font-family:inherit}
+  .btn-p{background:var(--brand);color:#fff}
+  .btn-p:hover{background:var(--brand-dark)}
+  .btn-g{background:#fff;color:var(--ink);border-color:var(--line)}
+  .btn-g:hover{background:var(--soft)}
+  section{padding:60px 0}
+  .hero{padding:76px 0 56px;background:linear-gradient(180deg,var(--soft),#fff)}
+  h1{font-size:clamp(30px,5vw,46px);line-height:1.15;letter-spacing:-.03em;margin:0 0 18px;max-width:16ch}
+  .sub{font-size:19px;color:var(--muted);max-width:60ch;margin:0 0 28px}
+  .cta{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .note{font-size:13.5px;color:var(--muted);margin-top:14px}
+  h2{font-size:clamp(23px,3.4vw,32px);letter-spacing:-.02em;margin:0 0 14px}
+  h3{font-size:17px;margin:0 0 6px}
+  .lead{color:var(--muted);max-width:64ch;margin:0 0 32px}
+  .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+  .card{border:1px solid var(--line);border-radius:var(--radius);padding:20px;background:#fff}
+  .card p{margin:0;color:var(--muted);font-size:14.5px}
+  .no{color:var(--hot);font-weight:700;margin-right:7px}
+  .yes{color:var(--brand);font-weight:700;margin-right:7px}
+  /* live demo */
+  .demo{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--soft)}
+  .bar{display:flex;align-items:center;gap:8px;padding:11px 14px;background:#fff;border-bottom:1px solid var(--line);font-size:13px;color:var(--muted)}
+  .lamp{width:10px;height:10px;border-radius:50%;background:#e5e7eb}
+  .lamp.g{background:var(--brand)}
+  .body{padding:18px}
+  .row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+  input,select,textarea{font:inherit;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:#fff;width:100%}
+  label{display:block;font-size:13px;color:var(--muted);margin-bottom:5px;font-weight:500}
+  .f{flex:1 1 170px}
+  #out{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;line-height:1.55;white-space:pre-wrap;background:#0f1a15;color:#d7e5dd;padding:16px;border-radius:9px;max-height:440px;overflow:auto}
+  .pill{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11.5px;font-weight:700;letter-spacing:.03em}
+  .p-hot{background:#ffedd5;color:#9a3412}
+  .p-warm{background:#fef3c7;color:#92400e}
+  .p-cold{background:#e0f2fe;color:#075985}
+  .skip{background:#fff;color:var(--muted)}
+  table{width:100%;border-collapse:collapse;font-size:14.5px;margin-top:8px}
+  th,td{text-align:left;padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-size:12.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600}
+  code{background:var(--soft);padding:2px 6px;border-radius:5px;font-size:13.5px}
+  pre{background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:14px;overflow:auto;font-size:12.5px;line-height:1.55}
+  footer{border-top:1px solid var(--line);padding:32px 0;color:var(--muted);font-size:14px;background:var(--soft)}
+  .faq details{border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:10px;background:#fff}
+  .faq summary{cursor:pointer;font-weight:600;font-size:15.5px}
+  .price{font-size:40px;font-weight:700;letter-spacing:-.03em;margin:6px 0}
+  .small{font-size:13.5px;color:var(--muted)}
+  @media(max-width:640px){nav a.hide{display:none}h1{font-size:31px}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <div class="logo"><span class="dot"></span>WasseLead</div>
+    <nav>
+      <a href="#how" class="hide">How it works</a>
+      <a href="#demo" class="hide">Live demo</a>
+      <a href="#pricing" class="hide">Pricing</a>
+      <a href="#faq" class="hide">FAQ</a>
+      <a href="https://github.com/fsix7115-arch/wasselead" class="btn btn-g" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="wrap">
+    <h1>Your WhatsApp leads go cold. Not because they're bad — because nobody followed up.</h1>
+    <p class="sub">A clinic, gym or shop gets 20–60 leads a week on WhatsApp. Most go quiet while you're busy doing the actual work. WasseLead ranks who needs a reply first, writes that reply in your own voice, and hands you a copy-paste list. It never sends anything automatically.</p>
+    <div class="cta">
+      <a href="#demo" class="btn btn-p">Try the live demo</a>
+      <a href="https://github.com/fsix7115-arch/wasselead" class="btn btn-g" target="_blank" rel="noopener">View the code</a>
+    </div>
+    <p class="note">Free forever for up to 40 leads a week. No signup, no WhatsApp Business API, no card.</p>
+  </div>
+</div>
+
+<section id="how">
+  <div class="wrap">
+    <h2>What it does, in four steps</h2>
+    <p class="lead">You paste in the leads you already have. It does the boring part — deciding who to reply to, and in what order.</p>
+    <div class="grid">
+      <div class="card"><h3>1 · Ranks your leads</h3><p>Someone asked a price question? Someone replied and got no answer? That jumps the queue. A plain "hello" waits.</p></div>
+      <div class="card"><h3>2 · Tells you when</h3><p>Hot leads are due in 2 hours, warm in a day, cold in two. You stop guessing and start working the list top-down.</p></div>
+      <div class="card"><h3>3 · Writes the message</h3><p>In your name and your business's voice. Put your prices in once and it answers the question people actually ask.</p></div>
+      <div class="card"><h3>4 · Removes the wrong ones</h3><p>Opt-outs, duplicate numbers written two different ways, and people who already booked never make it into your list.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="demo" style="background:var(--soft)">
+  <div class="wrap">
+    <h2>Live demo — run it right here</h2>
+    <p class="lead">This is the actual sorting logic running in your browser. Edit the leads and watch the queue change. Nothing is sent anywhere.</p>
+
+    <div class="demo">
+      <div class="bar">
+        <span class="lamp g"></span><span class="lamp g"></span><span class="lamp g"></span>
+        <span>wasselead — interactive demo (your data never leaves this page)</span>
+      </div>
+      <div class="body">
+        <div class="row">
+          <div class="f"><label for="d-name">Your business</label><input id="d-name" value="Apollo Physiotherapy &amp; Fitness"></div>
+          <div class="f"><label for="d-owner">Owner name</label><input id="d-owner" value="Dr. Meera"></div>
+        </div>
+        <div class="row">
+          <div class="f"><label for="d-price">Your price line (optional)</label><input id="d-price" value="Physio sessions are ₹600 each (₹4,500 for 8 sessions)."></div>
+          <div class="f"><label for="d-offer">Any current offer (optional)</label><input id="d-offer" value="First physio assessment is free this month."></div>
+        </div>
+        <div class="row">
+          <div class="f">
+            <label for="d-leads">Leads (one per line: name | phone | message | hours ago | replied | opted_out | booked)</label>
+            <textarea id="d-leads" rows="7" style="font-family:ui-monospace,Menlo,monospace;font-size:12.5px">Suresh Kumar | 9876543213 | I messaged last week, no reply | 144 | yes | |
+Priya Sharma | +91 98765 43210 | Do you have slots for knee physio this week? What are the charges? | 5 | | |
+Rohit Gupta | 09876543216 | what is the price for the 6 month plan? | 1 | | |
+Rahul Verma | 9876543211 | Interested in the personal training package | 26 | | |
+Anita Desai | 9876543212 | hello | 72 | | |
+Vikram Singh | 9876543215 | Booked appointment for Saturday 11am | 24 | | | yes
+Meena Iyer | 9876543214 | Please remove me from your list | 192 | | yes |
+P. Sharma | 09876543210 | price? | 4 | | |</textarea>
+          </div>
+        </div>
+        <div class="row">
+          <button class="btn btn-p" id="run">Rank my leads</button>
+          <button class="btn btn-g" id="reset">Reset to example</button>
+        </div>
+        <div id="out" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="not">
+  <div class="wrap">
+    <h2>What it deliberately doesn't do</h2>
+    <p class="lead">These aren't missing features. Each one is a decision that protects your business number.</p>
+    <div class="grid">
+      <div class="card"><p><span class="no">✕</span><strong>Doesn't send messages automatically</strong></p><p>You paste each one into WhatsApp yourself. Bulk automation breaks WhatsApp's terms and gets your business number banned — that costs you far more than this tool does.</p></div>
+      <div class="card"><p><span class="no">✕</span><strong>Doesn't message people who opted out</strong></p><p>Unsubscribe requests are filtered out before anything reaches your list, and a test asserts it.</p></div>
+      <div class="card"><p><span class="no">✕</span><strong>Doesn't message the same person twice</strong></p><p>+91 98765 43210, 098765 43210 and 9876543210 are one person. They're treated as one, so nobody gets a duplicate.</p></div>
+      <div class="card"><p><span class="no">✕</span><strong>Doesn't need a WhatsApp Business account</strong></p><p>No paid API, no approval wait, nothing to configure. It works with the number you already use.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="pricing" style="background:var(--soft)">
+  <div class="wrap">
+    <h2>Pricing</h2>
+    <p class="lead">One price, no tiers to decode. Cancel whenever.</p>
+    <div class="grid">
+      <div class="card">
+        <h3>Free</h3>
+        <div class="price">₹0</div>
+        <p>Up to 40 leads a week, everything included. No card, no signup. It stays free because the value only shows up when you use it.</p>
+        <p style="margin-top:14px"><a class="btn btn-g" href="#demo">Start now</a></p>
+      </div>
+      <div class="card" style="border-color:var(--brand);position:relative">
+        <span class="pill" style="position:absolute;top:-10px;right:14px;background:var(--brand);color:#fff">Most chosen</span>
+        <h3>Setup + monthly</h3>
+        <div class="price">₹2,999<span style="font-size:16px;font-weight:500;color:var(--muted)"> one-time</span></div>
+        <p>I set it up with your real prices, your tone and your team, train you on it, and keep it running. Monthly maintenance optional at ₹999.</p>
+        <p style="margin-top:14px"><a class="btn btn-p" href="mailto:hello@wasselead.in?subject=WasseLead%20setup">Book a setup call</a></p>
+      </div>
+      <div class="card">
+        <h3>Multi-branch</h3>
+        <div class="price">Talk to me</div>
+        <p>Two or more locations, per-person queues, and a shared handover. Priced on what you actually need, not on seats.</p>
+        <p style="margin-top:14px"><a class="btn btn-g" href="mailto:hello@wasselead.in?subject=WasseLead%20multi-branch">Get a quote</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="faq" class="faq">
+  <div class="wrap">
+    <h2>Questions people actually ask</h2>
+    <div style="max-width:760px">
+      <details><summary>Why doesn't it just send the messages for me?</summary><p>Because auto-sending on WhatsApp gets your business number banned, and a banned number stops all your customer messages — not just this tool's. If the whole business depends on one number, that risk isn't worth ₹999. You keep control; we do the sorting.</p></details>
+      <details><summary>Do I need to know coding?</summary><p>No. It's one command with a CSV. I can set it up for you in the ₹2,999 plan, and if you can run a Python file you can run this yourself.</p></details>
+      <details><summary>Will it work for Hindi or regional languages?</summary><p>Not yet. It currently reads and writes English. It's on the list, and if you need it, say so and I'll tell you honestly whether it's ready or not.</p></details>
+      <details><summary>What happens after I send a message?</summary><p>You mark it done in your own sheet. The tool doesn't know whether they replied, and I'd rather it be honest about that than pretend to track it.</p></details>
+      <details><summary>Is my customer data safe?</summary><p>It runs on your machine. Leads never leave your computer, and there is no server, no account and no database on my side. The live demo on this page runs entirely in your browser.</p></details>
+      <details><summary>What if it gives me bad advice about who to contact?</summary><p>It doesn't give advice. It ranks by what people wrote and when. You're the one who decides — it just makes sure the person who asked a price question today isn't sitting below someone who said "hello" three days ago.</p></details>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap" style="text-align:center;padding:20px 0 70px">
+    <h2 style="max-width:none">Your leads are already there. They just need a reply.</h2>
+    <p class="lead" style="margin:0 auto 24px">Try the demo on your own leads before you talk to anyone. It takes a minute and costs nothing.</p>
+    <div class="cta" style="justify-content:center">
+      <a href="#demo" class="btn btn-p">Run the live demo</a>
+      <a href="https://github.com/fsix7115-arch/wasselead" class="btn btn-g" target="_blank" rel="noopener">Read the source</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap" style="display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap">
+    <div><strong>WasseLead</strong> — WhatsApp lead follow-up for small businesses. MIT licensed, <a href="https://github.com/fsix7115-arch/wasselead" style="color:var(--brand)">open source</a>.</div>
+    <div class="small">Built to be run, not to be sold to. Your leads never leave your computer.</div>
+  </div>
+</footer>
+
+<script>
+// A faithful re-implementation of src/wasselead.py's ranking logic so the demo
+// is genuinely interactive. Kept intentionally small: urgency, dedupe, opt-out,
+// and the reply windows are the parts a buyer would want to poke at.
+const WINDOW = { hot: 2, warm: 24, cold: 48 };
+const HOURS = 3600e3;
+
+function normPhone(raw){
+  let d = String(raw).replace(/\D/g,'');
+  if(!d) throw new Error("no digits found in phone '"+raw+"'");
+  if(d.startsWith('0091')) d = d.slice(4);
+  else if(d.startsWith('91') && d.length===12) d = d.slice(2);
+  if(d.startsWith('0') && d.length===11) d = d.slice(1);
+  if(d.length===10) return '91'+d;
+  if(d>=11 && d<=15) return d;
+  throw new Error("phone '"+raw+"' does not look like a real number");
+}
+function urgency(l){
+  if(l.optedOut) return 'do_not_disturb';
+  if(l.booked) return 'cold';
+  if(l.replied) return 'hot';
+  const t = l.message.toLowerCase();
+  if(l.message.includes('?') || ['price','cost','charges','rate','how much','available','timing'].some(w=>t.includes(w))) return 'hot';
+  if(['interested','sure','ok','yes','tell me more','details'].some(w=>t.includes(w))) return 'warm';
+  return 'cold';
+}
+function first(n){ return (n.trim().split(/\s+/)[0]) || 'there'; }
+/** Normalise an owner's slot text to exactly one trailing full stop, so the
+ *  composed message is never a run-on or a double stop. Mirrors clean() in
+ *  src/wasselead.py. */
+function clean(s){
+  const v = String(s).trim().replace(/\.+$/,'');
+  return v ? v + '.' : v;
+}
+function message(l, b){
+  const n = first(l.name);
+  if(l.booked) return "Hi "+n+", this is "+b.owner+" from "+b.name+". Just confirming your appointment — reply YES to confirm or RESCHEDULE if you need a different time.";
+  if(l.replied) return "Hi "+n+", sorry for the delay in replying — thank you for your message. This is "+b.owner+" from "+b.name+". How can I help?";
+  const t = l.message.toLowerCase();
+  if(['price','cost','charges','rate','how much'].some(w=>t.includes(w)) && b.price)
+    return "Hi "+n+", this is "+b.owner+" from "+b.name+". Thanks for asking — "+clean(b.price)+" Want me to book you in?";
+  if(b.offer) return "Hi "+n+", this is "+b.owner+" from "+b.name+". Saw your message. "+clean(b.offer)+" Shall I share timings?";
+  return "Hi "+n+", this is "+b.owner+" from "+b.name+". Thanks for reaching out — how can I help?";
+}
+function reason(l,u){
+  if(l.booked) return "booked — send a confirmation, not a sales message";
+  if(l.replied) return "they replied and have had no answer";
+  if(u==='hot') return "asked a question and got no answer";
+  if(u==='warm') return "showed interest but no reply";
+  return "initial message, no reply yet";
+}
+
+function run(){
+  const biz = { name: document.getElementById('d-name').value || 'your business',
+                owner: document.getElementById('d-owner').value || 'there',
+                price: document.getElementById('d-price').value,
+                offer: document.getElementById('d-offer').value };
+  const now = Date.now();
+  const rows = document.getElementById('d-leads').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  const items=[], skipped=[], seen={};
+  let total=0;
+
+  for(const row of rows){
+    total++;
+    const p = row.split('|').map(x=>x.trim());
+    const l = { name:p[0]||'lead', phone:p[1]||'', message:p[2]||'',
+                hours:parseFloat(p[3]||'0')||0,
+                replied:(p[4]||'').toLowerCase()==='yes',
+                optedOut:(p[5]||'').toLowerCase()==='yes',
+                booked:(p[6]||'').toLowerCase()==='yes' };
+    if(l.optedOut){ skipped.push([l.name,'opted out']); continue; }
+    let phone;
+    try{ phone = normPhone(l.phone); }catch(e){ skipped.push([l.name,e.message]); continue; }
+    if(seen[phone]){ skipped.push([l.name,'duplicate of '+seen[phone]]); continue; }
+    seen[phone]=l.name;
+    const u = urgency(l);
+    if(u==='do_not_disturb'){ skipped.push([l.name,'do not disturb']); continue; }
+    const due = now - l.hours*HOURS + WINDOW[u]*HOURS;
+    items.push({l,u,phone,due,msg:message(l,biz),why:reason(l,u)});
+  }
+
+  const order={hot:0,warm:1,cold:2};
+  items.sort((a,b)=> order[a.u]-order[b.u] || a.due-b.due);
+
+  const counts={};
+  items.forEach(i=>counts[i.u]=(counts[i.u]||0)+1);
+
+  const fmt=ts=>new Date(ts).toISOString().slice(0,16).replace('T',' ');
+  let out = "Lead follow-up — "+biz.name+"\n"+"=".repeat(60)+"\n";
+  if(skipped.length){
+    out += "Skipped "+skipped.length+":\n";
+    skipped.forEach(s=> out += "  - "+s[0]+": "+s[1]+"\n");
+  }
+  if(!items.length){ out += "\nNothing to follow up. Every lead is handled."; }
+  else{
+    for(const i of items){
+      const late = i.due<=now ? "LATE " : "     ";
+      out += "\n["+i.u.toUpperCase().padEnd(4)+"] "+i.l.name+"  "+late+"(due "+fmt(i.due)+")\n";
+      out += "        "+i.phone+"  — "+i.why+"\n";
+      out += "        \""+i.msg+"\"\n";
+    }
+  }
+  out += "\n"+"=".repeat(60)+"\n";
+  out += "Counts: "+Object.keys(counts).sort().map(k=>k+"="+counts[k]).join(", ")+"\n";
+  out += "Copy each message into WhatsApp yourself. Nothing is sent automatically.";
+  document.getElementById('out').textContent = out;
+}
+
+document.getElementById('run').addEventListener('click', run);
+document.getElementById('reset').addEventListener('click', ()=>{ location.reload(); });
+run();
+</script>
+</body>
+</html>
