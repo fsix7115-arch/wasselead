@@ -1,0 +1,59 @@
+[
+  {
+    "name": "Priya Sharma",
+    "phone": "+91 98765 43210",
+    "message": "Hi, do you have slots for knee physiotherapy this week? Also what are the charges?",
+    "received_at": "2026-10-01T05:00:00+00:00"
+  },
+  {
+    "name": "Rahul Verma",
+    "phone": "098765 43211",
+    "message": "Interested in the personal training package",
+    "received_at": "2026-09-30T08:00:00+00:00"
+  },
+  {
+    "name": "Anita Desai",
+    "phone": "+919876543212",
+    "message": "hello",
+    "received_at": "2026-09-28T10:00:00+00:00"
+  },
+  {
+    "name": "Suresh Kumar",
+    "phone": "98765-43213",
+    "message": "I messaged last week, no reply",
+    "received_at": "2026-09-25T10:00:00+00:00",
+    "replied": true
+  },
+  {
+    "name": "Meena Iyer",
+    "phone": "+91 98765 43214",
+    "message": "Please remove me from your list",
+    "received_at": "2026-09-23T10:00:00+00:00",
+    "opted_out": true
+  },
+  {
+    "name": "Vikram Singh",
+    "phone": "09876543215",
+    "message": "Booked appointment for Saturday 11am",
+    "received_at": "2026-09-30T10:00:00+00:00",
+    "booked": true
+  },
+  {
+    "name": "Rohit Gupta",
+    "phone": "+91 98765 43216",
+    "message": "what is the price for the 6 month plan?",
+    "received_at": "2026-10-01T09:00:00+00:00"
+  },
+  {
+    "name": "P. Sharma",
+    "phone": "09876543210",
+    "message": "price?",
+    "received_at": "2026-10-01T06:00:00+00:00"
+  },
+  {
+    "name": "Fatima Sheikh",
+    "phone": "",
+    "message": "no phone given",
+    "received_at": "2026-10-01T07:00:00+00:00"
+  }
+]

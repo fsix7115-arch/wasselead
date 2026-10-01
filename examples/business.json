@@ -1,0 +1,8 @@
+{
+  "name": "Apollo Physiotherapy & Fitness",
+  "owner_name": "Dr. Meera",
+  "slots": {
+    "price": "Physio sessions are \u20b9600 each (\u20b94,500 for 8 sessions). Personal training is \u20b93,000/month.",
+    "offer": "First physio assessment is free this month."
+  }
+}

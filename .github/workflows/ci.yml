@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Tests (stdlib only, no install)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      # Zero dependencies is the point: the suite must run on a bare python3.
+      - name: Run tests
+        run: python3 -m unittest discover -s tests -p 'test_*.py' -v
+      - name: Tool runs on the example data
+        run: python3 src/wasselead.py examples/leads.json --business examples/business.json
+      - name: JSON output is valid
+        run: |
+          python3 src/wasselead.py examples/leads.json --json > out.json
+          python3 -c "import json; d=json.load(open('out.json')); print(d['counts'])"
